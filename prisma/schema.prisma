@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model transaction {
+  txHash                          String   @id @db.VarChar(50)
+  sender                          String   @db.VarChar(50)
+  receiver                        String   @db.VarChar(50)
+  result                          Boolean  @db.Bit(1)
+  amount                          Float    @db.Float
+  fee                             Float    @db.Float
+  height                          Int
+  time                            DateTime @db.DateTime(0)
+  user_transaction_receiverTouser user     @relation("transaction_receiverTouser", fields: [receiver], references: [address], onDelete: NoAction, onUpdate: NoAction, map: "receiverFK")
+  user_transaction_senderTouser   user     @relation("transaction_senderTouser", fields: [sender], references: [address], onDelete: NoAction, onUpdate: NoAction, map: "senderFK")
+
+  @@index([receiver], map: "receiverFK_idx")
+  @@index([sender], map: "senderFK_idx")
+}
+
+model user {
+  address                                String        @id @db.VarChar(50)
+  username                               String        @db.VarChar(20)
+  asset                                  Float         @db.Float
+  transaction_transaction_receiverTouser transaction[] @relation("transaction_receiverTouser")
+  transaction_transaction_senderTouser   transaction[] @relation("transaction_senderTouser")
+}
+
+model deck {
+  requestId String @db.VarChar(100)
+  index     Int
+  deck      Json
+
+  @@id([requestId, index])
+}
+
+model jwt {
+  token String @id @db.VarChar(255)
+}
