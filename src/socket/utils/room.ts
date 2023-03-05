@@ -124,7 +124,8 @@ export const createPlayer =
         result = false;
         } else {
         const player: Player = {
-            socketUser: socketUser
+            socketUser: socketUser,
+            remain: true
         }
         roomSet[roomIndex].players.push(player);
      }
@@ -155,7 +156,8 @@ export const setSocketUserPositionInRoom =
         }
     }
 
-export const createNewRoom = (code: string, betAmount: number, socketId: string, roomSet: RoomSet): boolean => {
+export const createNewRoom = 
+(code: string, betAmount: number, socketId: string, roomSet: RoomSet): boolean => {
     let result: boolean = true;
     const roomIndex: number = getRoomIndexFromCode(code, roomSet);
     if (roomIndex != -1) {
@@ -171,6 +173,30 @@ export const createNewRoom = (code: string, betAmount: number, socketId: string,
     return result;
 }
 
+export const setPlayerRemain = 
+(socketId: string, roomSet: RoomSet, toStatus: boolean): void => {
+let playerCurrentRoomIndex: number = getPlayerCurrentRoomIndex(socketId, roomSet);
+let playerPosition: number = getPlayerCurrentPositionInRoom(socketId, roomSet);
+if (playerCurrentRoomIndex != -1 && playerPosition != -1){
+    roomSet[playerCurrentRoomIndex].players[playerPosition].remain = toStatus;
+}
+}
+
+export const deleteNotRemainPlayer =
+(code: string, roomSet: RoomSet) => {
+    const roomIndex: number = getRoomIndexFromCode(code, roomSet);
+    const numberOfPlayers: number = getNumberOfPlayers(code, roomSet);
+    if (roomIndex != -1 && numberOfPlayers != -1){
+        if (numberOfPlayers > 0){
+            for (let i: number = 0; i < numberOfPlayers; i++){
+                const socketId: string = roomSet[roomIndex].players[i].socketUser.socketId;
+                if (!roomSet[roomIndex].players[i].remain){
+                    deletePlayerFromRoom(socketId, roomSet);
+                }
+            }
+        }
+    }
+}
 
 // let roomSetTest: RoomSet = [{
 //     code: '1',

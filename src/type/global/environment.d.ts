@@ -8,7 +8,8 @@ declare global {
         RPC_ENDPOINT: string|undefined
         CARD_GAME_CONTRACT: string|undefined
         GAS_PRICE: string|undefined
-        HASH_SECRET: string|undefined
+        HASH_SECRET: string|undefined,
+        LCD_ENDPOINT_TXHASH: string|undefined
     }
   }
 }

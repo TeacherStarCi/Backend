@@ -4,7 +4,8 @@ import { Hand } from "./deck"
 
 export type Player = {
     socketUser: SocketUser,
-    hand?: Hand
+    hand?: Hand,
+    remain: boolean
 }
 
 export type Room = {

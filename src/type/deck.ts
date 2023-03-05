@@ -1,19 +1,33 @@
+export type CardNameValue = 'Ace'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'10'|'Jack'|'Queen'|'King';
+export type SuitValue = 'Spades'|'Clubs'|'Diamonds'|'Hearts'
+export type MarkValue =  0|1|2|3|4|5|6|7|8|9;
+export type HandState = {state:'Base'} | {state:'ThreeFaceCards'} | {state: 'Flush', begin: number} | {state: 'ThreeOfAKind', value: number};
+
 export type Card = {
-    cardName: 'Ace'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'10'|'Jack'|'Queen'|'King', 
-    suit: 'Spades'|'Clubs'|'Diamonds'|'Hearts'
+    cardName: CardNameValue, 
+    suit: SuitValue
 }
+
 export type Hand = {
     cards: Card[],
-    result: string,
+    result: HandState,
     isWinner: boolean
 }
 
 export type Deck = Card[]
 
-export type DeckWithRequestId = {
-    requestId: string,
+export type DeckWithTransactionHash = {
+    txHash: string,
     index: number,
     deck: number[]
 }
 
-export type DecksWithRequestId = DeckWithRequestId[]
+export type DecksWithTransactionHash = DeckWithTransactionHash[]
+
+export type CardedDeckWithTransactionHash = {
+    txHash: string,
+    index: number,
+    deck: Card[]
+}
+
+export type CardedDecksWithTransactionHash = CardedDeckWithTransactionHash[]

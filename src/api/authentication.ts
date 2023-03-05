@@ -1,6 +1,6 @@
 import { Application, Request, response, Response } from 'express';
 import { addJwtToken, addUser, getLastedJwtTokenMatchedAddress, getUser, getUserWithTransaction } from '../database';
-import { jwtDecodeWithHashSecret, jwtSignWithHashSecret } from '../hash/jwt';
+import { jwtDecodeWithHashSecret, jwtSignWithHashSecret } from '../hash';
 import { JwtDecodedToken, JwtPayload, Session, SessionWithoutId, User } from '../type';
 
 export const authenticationApi = (app: Application) => {

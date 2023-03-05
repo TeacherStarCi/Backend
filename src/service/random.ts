@@ -1,13 +1,14 @@
-import { CosmWasmClient, ExecuteResult, SigningCosmWasmClient, SigningCosmWasmClientOptions } from "@cosmjs/cosmwasm-stargate";
+import { ExecuteResult, SigningCosmWasmClient, SigningCosmWasmClientOptions } from "@cosmjs/cosmwasm-stargate";
 import { AccountData, Coin, DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import { GasPrice } from "@cosmjs/stargate";
 import { addDeck } from "../database";
-import { getIdHashedFromCurrentTimestamp } from "../hash/sha256";
-import { DecksWithRequestId, DeckWithRequestId } from "../type";
+import { getHashedFromCurrentTimestamp } from "../hash";
+import {  DeckWithTransactionHash } from "../type";
 
 export const getCards
-    = async (): Promise<void> => {
+    = async (): Promise<string> => {
         //from .env
+        let result: string = '';
         const mnemonic: string | undefined = process.env.MNEMONIC;
         const prefix: string | undefined = process.env.PREFIX;
         const rpcEndpoint: string | undefined = process.env.RPC_ENDPOINT;
@@ -28,7 +29,7 @@ export const getCards
             const client: SigningCosmWasmClient =
                 await SigningCosmWasmClient.connectWithSigner(rpcEndpoint, wallet, options);
             const serverAddress: string = firstAccount.address;
-            const requestId: string = getIdHashedFromCurrentTimestamp();
+            const requestId: string = getHashedFromCurrentTimestamp('request');
             const funds: Coin[] = [
                 {
                     denom: 'ueaura',
@@ -48,6 +49,7 @@ export const getCards
                 "",
                 funds
             )
+            result = excuteResult.transactionHash;
             let decks: number[][] | null = null;
             const sleep = async (ms: number) => setTimeout(() => { }, ms);
             while (!decks) {
@@ -55,7 +57,7 @@ export const getCards
                     get_decks:
                     {
                         request_id: requestId,
-                        num: 100
+                        num: 3
                     }
                 }
                 )
@@ -65,17 +67,16 @@ export const getCards
             if (decks != null) {
                 const length: number = decks.length;
                 for (let i: number = 0; i < length; i++){
-                    const deckWithRequestId: DeckWithRequestId = {
-                        requestId: requestId,
+                    const deckWithTransactionHash: DeckWithTransactionHash = {
+                        txHash: result,
                         index: i,
                         deck: decks[i]
                     }
-                    await addDeck(deckWithRequestId);
+                    await addDeck(deckWithTransactionHash);
                 } 
             }
-
-
         }
+        return result;
     }
 
 
