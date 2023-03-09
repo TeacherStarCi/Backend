@@ -3,7 +3,7 @@ import { AccountData, Coin, DirectSecp256k1HdWallet } from "@cosmjs/proto-signin
 import { GasPrice } from "@cosmjs/stargate";
 import { addDeck } from "../database";
 import { getHashedFromCurrentTimestamp } from "../hash";
-import {  DeckWithTransactionHash } from "../type";
+import {  CardPosition, DeckWithTransactionHash } from "../type";
 
 export const getCards
     = async (): Promise<string> => {
@@ -18,9 +18,12 @@ export const getCards
         if (typeof gasPriceString != 'undefined') {
             gasPrice = GasPrice.fromString(gasPriceString);
         }
-        if (typeof mnemonic != 'undefined' && typeof prefix != 'undefined'
-            && typeof rpcEndpoint != 'undefined' && typeof cardGameContract != 'undefined' && typeof gasPrice != 'undefined') {
-            const wallet: DirectSecp256k1HdWallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, { prefix });
+        if (typeof mnemonic != 'undefined' &&
+         typeof prefix != 'undefined' &&
+          typeof rpcEndpoint != 'undefined' &&
+           typeof cardGameContract != 'undefined' &&
+            typeof gasPrice != 'undefined') {
+            const wallet: DirectSecp256k1HdWallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, { prefix: prefix });
             const firstAccount: AccountData = (await wallet.getAccounts())[0];
             const options: SigningCosmWasmClientOptions = {
                 prefix: prefix,
@@ -50,29 +53,38 @@ export const getCards
                 funds
             )
             result = excuteResult.transactionHash;
-            let decks: number[][] | null = null;
-            const sleep = async (ms: number) => setTimeout(() => { }, ms);
-            while (!decks) {
-                decks = await client.queryContractSmart(cardGameContract, {
+            let deckSet: {decks: number[][]} | null = null;
+            const sleep = async (ms: number) => setTimeout(() => {}, ms);
+            while (!deckSet) {
+                deckSet = await client.queryContractSmart(cardGameContract, {
                     get_decks:
                     {
                         request_id: requestId,
-                        num: 3
+                        num: 10
                     }
                 }
                 )
                 await sleep(5000);
             }
-            
-            if (decks != null) {
-                const length: number = decks.length;
+          
+            if (deckSet != null) {
+                const length: number = deckSet.decks.length;
                 for (let i: number = 0; i < length; i++){
+                    let j: number = 0;
+                    const cardPositions: CardPosition[] = deckSet.decks[i].map(cardPosition => {
+                        j++;
+                        return {
+                            cardValue: j,
+                            cardPosition: cardPosition
+                        }
+                       
+                    })
                     const deckWithTransactionHash: DeckWithTransactionHash = {
                         txHash: result,
                         index: i,
-                        deck: decks[i]
+                        deck: cardPositions
                     }
-                    await addDeck(deckWithTransactionHash);
+                    await addDeck(deckWithTransactionHash).then(res => console.log(res));
                 } 
             }
         }

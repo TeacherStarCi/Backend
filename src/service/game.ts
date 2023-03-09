@@ -1,5 +1,5 @@
 import { getDecks } from "../database";
-import { Card, CardedDecksWithTransactionHash, CardedDeckWithTransactionHash, CardNameValue, DecksWithTransactionHash, HandState, SuitValue } from "../type";
+import { Card, CardedDecksWithTransactionHash, CardedDeckWithTransactionHash, CardNameValue, CardPosition, DecksWithTransactionHash, HandState, SuitValue } from "../type";
 
 export const getCardFromIndex = (index: number): Card | null => {
     let result: Card | null = null;
@@ -157,7 +157,10 @@ export const getHandState = (cards: Card[]): HandState | null => {
                 if (minCardNameIndex >= 11) {
                     result = { state: 'ThreeFaceCards' }
                 } else {
-                    result = { state: 'Base' }
+                   const level:number = (getCardLevel(cards[0].cardName) 
+                    + getCardLevel(cards[1].cardName)
+                    + getCardLevel(cards[2].cardName))% 10;
+                    result = { state: 'Base' , level: level }
                 }
             }
 
@@ -215,7 +218,7 @@ export const getCardLevel = (cardName: CardNameValue): number => {
 export const getHandRank = (cards: Card[]): number => {
     let result: number = -1;
     const handState: HandState | null = getHandState(cards);
-    if (handState != null) {
+    if (handState != null && cards.length == 3) {
         switch (handState.state) {
             case 'Base':
 
@@ -240,8 +243,8 @@ export const getCardedDecks = (decksWithTransactionHash: DecksWithTransactionHas
     if (decksWithTransactionHash.length > 0) {
         for (let i: number = 0; i < decksWithTransactionHash.length; i++) {
 
-            const indexedDeck: number[] = decksWithTransactionHash[i].deck;
-            const cardedDeck: (Card | null)[] = indexedDeck.map(card => getCardFromIndex(card));
+            const indexedDeck: CardPosition[] = decksWithTransactionHash[i].deck;
+            const cardedDeck: (Card | null)[] = indexedDeck.map(card => getCardFromIndex(card.cardPosition));
             const modifiedCardedDeck: Card[] = [];
 
             cardedDeck.forEach(card => {

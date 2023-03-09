@@ -90,13 +90,7 @@ const roomSet: RoomSet =
         }
     ]
     ;
-const decks: DecksWithTransactionHash = [
-    {
-        txHash: '123',
-        index: 5,
-        deck: [1, 3, 5, 43, 32, 52, 51, 23, 45, 12, 17, 33, 13, 14, 19, 20]
-    }
-]
+const decks: DecksWithTransactionHash = []
 
 // .env
 

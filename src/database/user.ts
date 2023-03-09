@@ -1,5 +1,4 @@
 import { PrismaClient, user } from '@prisma/client'
-import { ppid } from 'process';
 import { Transaction, User } from '../type';
 import { getTransaction } from './transaction';
 const prisma = new PrismaClient();

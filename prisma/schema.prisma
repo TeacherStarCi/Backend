@@ -44,8 +44,14 @@ model jwt {
 }
 
 model deckdetail {
-  deckId    String @db.VarChar(100)
-  cardIndex Int
+  deckId       String @db.VarChar(100)
+  cardValue    Int
+  cardPosition Int
 
-  @@id([deckId, cardIndex])
+  @@id([deckId, cardValue])
+}
+
+model verify {
+  token     String  @id @db.VarChar(100)
+  available Boolean @db.Bit(1)
 }

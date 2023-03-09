@@ -1,13 +1,13 @@
 import { deck, deckdetail, PrismaClient, transaction } from '@prisma/client'
 import { getHashedFromCurrentTimestamp } from '../hash';
-import { DeckWithTransactionHash, DecksWithTransactionHash, Deck } from '../type';
+import { DeckWithTransactionHash, DecksWithTransactionHash, Deck, CardPosition } from '../type';
 const prisma = new PrismaClient();
 
 export const addDeck = async (deck: DeckWithTransactionHash): Promise<boolean> => {
    let result: boolean = true;
    await prisma.$connect();
    try {
-      const deckId: string = getHashedFromCurrentTimestamp('deckId');
+      const deckId: string = getHashedFromCurrentTimestamp('deck');
       const deckData: deck = {
          txHash: deck.txHash,
          index: deck.index,
@@ -18,21 +18,22 @@ export const addDeck = async (deck: DeckWithTransactionHash): Promise<boolean> =
             data: deckData
          }
       )
-     
-      if (deck.deck.length > 0){
-     
-        for (let i: number = 0; i < deck.deck.length; i++){
-         const deckDetailData: deckdetail = {
-            deckId: deckId,
-            cardIndex: deck.deck[i] 
-           }
-         await prisma.deckdetail.create({
-            data: deckDetailData
+
+      if (deck.deck.length > 0) {
+
+         for (let i: number = 0; i < deck.deck.length; i++) {
+            const deckDetailData: deckdetail = {
+               deckId: deckId,
+               cardValue: deck.deck[i].cardValue,
+               cardPosition: deck.deck[i].cardPosition
+            }
+            await prisma.deckdetail.create({
+               data: deckDetailData
+            }
+            )
          }
-         )
-        }
       }
-      
+
    } catch (err: any) {
       result = false;
    }
@@ -40,18 +41,18 @@ export const addDeck = async (deck: DeckWithTransactionHash): Promise<boolean> =
    return result;
 }
 
-export const addDecks = async (decks : DecksWithTransactionHash): Promise<boolean[]> => {
-  const results: boolean[] = [];
+export const addDecks = async (decks: DecksWithTransactionHash): Promise<boolean[]> => {
+   const results: boolean[] = [];
    await prisma.$connect();
-   if (decks.length > 0){
+   if (decks.length > 0) {
       let result: boolean = true;
-     for (let i: number = 0 ; i++ ; i < decks.length){
-      try{
-         await addDeck(decks[i]);     
-       } catch (err: any){
-         result = false;
-       }
-       results.push(result);
+      for (let i: number = 0; i++; i < decks.length) {
+         try {
+            await addDeck(decks[i]);
+         } catch (err: any) {
+            result = false;
+         }
+         results.push(result);
       }
    }
    await prisma.$disconnect();
@@ -66,19 +67,24 @@ export const getDecks = async (txHash: string): Promise<DecksWithTransactionHash
          txHash: txHash
       }
    });
-   if (decks.length > 0){
-      for (let i: number = 0; i < decks.length; i++){
+   if (decks.length > 0) {
+      for (let i: number = 0; i < decks.length; i++) {
          const deckId: string = decks[i].deckId;
-       const deckDetails: deckdetail[] = await prisma.deckdetail.findMany({
+         const deckDetails: deckdetail[] = await prisma.deckdetail.findMany({
             where: {
                deckId: deckId
             }
          })
-      const cards: number[] = deckDetails.map(deckDetails => deckDetails.cardIndex);
+         const cards: CardPosition[] = deckDetails.map(deckDetails => {
+            return {
+               cardValue: deckDetails.cardValue,
+               cardPosition: deckDetails.cardPosition
+            }
+         });
          const deckWithTransactionHash: DeckWithTransactionHash = {
-     txHash: txHash,
-     index: decks[i].index,
-     deck: cards
+            txHash: txHash,
+            index: decks[i].index,
+            deck: cards
          }
          results.push(deckWithTransactionHash)
       }

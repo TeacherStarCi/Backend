@@ -14,9 +14,9 @@ export const setAllPlayersHandsWhenStart =
             if (numberOfPlayers > 0) {
                 for (let i: number = 0; i < numberOfPlayers; i++) {
 
-                    const firstCard: Card | null = getCardFromIndex(deck.deck[3 * i]);
-                    const secondCard: Card | null = getCardFromIndex(deck.deck[3 * i + 1]);
-                    const thirdCard: Card | null = getCardFromIndex(deck.deck[3 * i + 2]);
+                    const firstCard: Card | null = getCardFromIndex(deck.deck[3 * i].cardPosition);
+                    const secondCard: Card | null = getCardFromIndex(deck.deck[3 * i + 1].cardPosition);
+                    const thirdCard: Card | null = getCardFromIndex(deck.deck[3 * i + 2].cardPosition);
                     if (firstCard != null
                         && secondCard != null
                         && thirdCard != null) {

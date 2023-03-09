@@ -7,9 +7,10 @@ export const addJwtToken = async (token: string): Promise<boolean> => {
     let result: boolean = true;
     await prisma.$connect();
     try {
+        const jwtToken: JwtToken = { token: token };
         await prisma.jwt.create(
             {
-                data: { token: token }
+                data: jwtToken
             }
         );
     } catch (err: any) {

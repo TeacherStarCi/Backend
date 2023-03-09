@@ -14,3 +14,8 @@ export type JwtDecodedToken =
     export type JwtToken = {
         token : string
     }
+
+    export type VerifyToken = {
+        token: string,
+        available : boolean
+    }

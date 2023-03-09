@@ -13,14 +13,16 @@ export const getTransaction = async (address: string, type: 'deposit'|'withdraw'
         where: {
           sender: address
         }
-      })
+      }
+      )
       break;
     case 'withdraw':
       transactions = await prisma.transaction.findMany({
         where: {
           receiver: address
         }
-      })
+      }
+      )
       break;
   }
 

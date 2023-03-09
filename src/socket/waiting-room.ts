@@ -7,13 +7,16 @@ export const waitingRoomSocket = (io: Server, socket: Socket, roomSet: RoomSet) 
         const result: boolean = createNewRoom(code, betAmount, socket.id, roomSet);
         switch (result) {
             case true: socket.join(code);
-                const roomIndex: number = getRoomIndexFromCode(code, roomSet);
+           
+            const roomIndex: number = getRoomIndexFromCode(code, roomSet);
                 createPlayer(socket.id, user, code, roomSet);
                 io.to(code).emit('update room', getRoomFromCode(code, roomSet));
+    
                 break;
             case false: socket.emit('fail to create new room');
                 break;
         }
+    
     })
 
     socket.on('show available room request', () => {
@@ -25,12 +28,17 @@ export const waitingRoomSocket = (io: Server, socket: Socket, roomSet: RoomSet) 
        const createPlayerResult:boolean = createPlayer(socket.id, user, code, roomSet);
        switch (createPlayerResult) {
         case true:
+        
+        socket.join(code);
             io.to(code).emit('update room', getRoomFromCode(code, roomSet));
-            break;  
+           //temp code
+        
+           break;  
         case false:
-            io.emit('fail to join the room');
+            socket.emit('fail to join the room');
             break;
        }
+       console.log(getRoomFromCode(code, roomSet));
     })    
 
 }
